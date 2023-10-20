@@ -9,6 +9,7 @@ import { addToCart } from "@/lib/network/cartService";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import { ReloadIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
 
 type Props = {};
 
@@ -61,7 +62,7 @@ const ProductContent = (props: Props) => {
 							}}
 						>
 							<div className="aspect-h-1 aspect-w-1 w-full overflow-hidden h-52 rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
-								<img
+								<Image
 									src={product.thumbnail}
 									alt={product.title}
 									className="h-full w-full object-cover object-center lg:h-full lg:w-full"
@@ -136,7 +137,7 @@ const ProductContent = (props: Props) => {
 
 										<div className="grid w-full grid-cols-1 items-start gap-x-6 gap-y-8 sm:grid-cols-12 lg:gap-x-8">
 											<div className="aspect-h-3 aspect-w-2 overflow-hidden rounded-lg bg-gray-100 sm:col-span-4 lg:col-span-5">
-												<img
+												<Image
 													src={products && products[selectedIndex].thumbnail}
 													alt={products && products[selectedIndex].title}
 													className="object-cover object-center"

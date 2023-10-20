@@ -22,6 +22,7 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import Image from "next/image";
 
 const originalArray = ["smartphones", "laptops", "mens-shoes", "womens-shoes"];
 
@@ -217,13 +218,13 @@ export default function NavBar() {
 							<Popover.Group className="hidden lg:ml-8 lg:block lg:self-stretch">
 								<div className="flex h-full space-x-8">
 									{categories.map((page) => (
-										<a
+										<Link
 											key={page.name}
 											href={page.href}
 											className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
 										>
 											{page.name}
-										</a>
+										</Link>
 									))}
 								</div>
 							</Popover.Group>
@@ -240,32 +241,32 @@ export default function NavBar() {
 										className="h-6 w-px bg-gray-200"
 										aria-hidden="true"
 									/>
-									<a
-										href="#"
+									<Link
+										href="/signup"
 										className="text-sm font-medium text-gray-700 hover:text-gray-800"
 									>
 										Create account
-									</a>
+									</Link>
 								</div>
 
 								<div className="hidden lg:ml-8 lg:flex">
-									<a
+									<Link
 										href="#"
 										className="flex items-center text-gray-700 hover:text-gray-800"
 									>
-										<img
+										<Image
 											src="https://tailwindui.com/img/flags/flag-canada.svg"
 											alt=""
 											className="block h-auto w-5 flex-shrink-0"
 										/>
 										<span className="ml-3 block text-sm font-medium">CAD</span>
 										<span className="sr-only">, change currency</span>
-									</a>
+									</Link>
 								</div>
 
 								{/* Search */}
 								<div className="flex lg:ml-6">
-									<a
+									<Link
 										href="#"
 										className="p-2 text-gray-400 hover:text-gray-500"
 									>
@@ -274,7 +275,7 @@ export default function NavBar() {
 											className="h-6 w-6"
 											aria-hidden="true"
 										/>
-									</a>
+									</Link>
 								</div>
 
 								{/* Cart */}
@@ -282,7 +283,7 @@ export default function NavBar() {
 									onClick={() => setOpenCart(true)}
 									className="ml-4 flow-root lg:ml-6"
 								>
-									<a
+									<Link
 										href="#"
 										className="group -m-2 flex items-center p-2"
 									>
@@ -294,7 +295,7 @@ export default function NavBar() {
 											0
 										</span>
 										<span className="sr-only">items in cart, view bag</span>
-									</a>
+									</Link>
 								</div>
 							</div>
 						</div>
