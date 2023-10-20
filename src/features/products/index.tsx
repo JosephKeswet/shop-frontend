@@ -1,69 +1,48 @@
 "use client";
 import React from "react";
 import { Fragment, useState } from "react";
-import { Dialog, RadioGroup, Transition } from "@headlessui/react";
+import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { StarIcon } from "@heroicons/react/20/solid";
+import { useMutation, useQuery } from "react-query";
+import { getProducts } from "@/lib/network/productService";
+import { addToCart } from "@/lib/network/cartService";
+import toast from "react-hot-toast";
+import Cookies from "js-cookie";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 type Props = {};
 
 const ProductContent = (props: Props) => {
 	const [open, setOpen] = useState(false);
+	const { data: products } = useQuery(["products"], getProducts, {
+		cacheTime: 20000,
+		staleTime: 20000,
+		retry:20000
+	});
 
-	const product = {
-		name: "Basic Tee 6-Pack ",
-		price: "$192",
-		rating: 3.9,
-		reviewCount: 117,
-		href: "#",
-		imageSrc:
-			"https://tailwindui.com/img/ecommerce-images/product-quick-preview-02-detail.jpg",
-		imageAlt: "Two each of gray, white, and black shirts arranged on table.",
-		colors: [
-			{ name: "White", class: "bg-white", selectedClass: "ring-gray-400" },
-			{ name: "Gray", class: "bg-gray-200", selectedClass: "ring-gray-400" },
-			{ name: "Black", class: "bg-gray-900", selectedClass: "ring-gray-900" },
-		],
-		sizes: [
-			{ name: "XXS", inStock: true },
-			{ name: "XS", inStock: true },
-			{ name: "S", inStock: true },
-			{ name: "M", inStock: true },
-			{ name: "L", inStock: true },
-			{ name: "XL", inStock: true },
-			{ name: "XXL", inStock: true },
-			{ name: "XXXL", inStock: false },
-		],
-	};
 	const [selectedIndex, setSelectedIndex] = useState(0);
-	const [selectedSize, setSelectedSize] = useState(product.sizes[2]);
-
-	function classNames(...classes: any) {
-		return classes.filter(Boolean).join(" ");
-	}
-	const products = [
+	const { mutate: addItemToCart, isLoading: isAddingToCart,data } = useMutation(
+		addToCart,
 		{
-			id: 1,
-			name: "Basic Tee",
-			href: "#",
-			imageSrc:
-				"https://tailwindui.com/img/ecommerce-images/product-page-01-related-product-01.jpg",
-			imageAlt: "Front of men's Basic Tee in black.",
-			price: "$35",
-			color: "Black",
-		},
-        {
-			id: 2,
-			name: "Basic Shirt",
-			href: "#",
-			imageSrc:
-				"https://tailwindui.com/img/ecommerce-images/product-page-01-related-product-01.jpg",
-			imageAlt: "Front of men's Basic Tee in black.",
-			price: "$35",
-			color: "Black",
-		},
-		// More products...
-	];
+			onSuccess: ({ msg, message }) => {
+				toast.success(msg);
+				console.log(message);
+			},
+			onError: ({ response }) => {
+				console.log(response);
+				toast.error(data?.message);
+			},
+		}
+	);
+
+	const handleAddToCart = (productId: string) => {
+		const userId = Cookies.get("userId") as string;
+		const convertedUserId = parseFloat(userId);
+		const convertedProductId = productId.toString();
+
+		addItemToCart({ userId: convertedUserId, productId: convertedProductId });
+	};
+
 	return (
 		<div className="bg-white">
 			<div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
@@ -71,20 +50,20 @@ const ProductContent = (props: Props) => {
 					Customers also purchased
 				</h2>
 
-				<div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-					{products.map((product,index:number) => (
+				<div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-[74px] sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+					{products?.map((product: any, index: number) => (
 						<div
 							key={product.id}
-							className="group relative"
+							className="group relative cursor-pointer"
 							onClick={() => {
-                                setOpen(true)
-                                setSelectedIndex(index)
-                            }}
+								setOpen(true);
+								setSelectedIndex(index);
+							}}
 						>
-							<div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
+							<div className="aspect-h-1 aspect-w-1 w-full overflow-hidden h-52 rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
 								<img
-									src={product.imageSrc}
-									alt={product.imageAlt}
+									src={product.thumbnail}
+									alt={product.title}
 									className="h-full w-full object-cover object-center lg:h-full lg:w-full"
 								/>
 							</div>
@@ -96,13 +75,13 @@ const ProductContent = (props: Props) => {
 												aria-hidden="true"
 												className="absolute inset-0"
 											/>
-											{product.name}
+											{product.title}
 										</a>
 									</h3>
-									<p className="mt-1 text-sm text-gray-500">{product.color}</p>
+									{/* <p className="mt-1 text-sm text-gray-500">{product.color}</p> */}
 								</div>
 								<p className="text-sm font-medium text-gray-900">
-									{product.price}
+									${product.price}
 								</p>
 							</div>
 						</div>
@@ -158,14 +137,14 @@ const ProductContent = (props: Props) => {
 										<div className="grid w-full grid-cols-1 items-start gap-x-6 gap-y-8 sm:grid-cols-12 lg:gap-x-8">
 											<div className="aspect-h-3 aspect-w-2 overflow-hidden rounded-lg bg-gray-100 sm:col-span-4 lg:col-span-5">
 												<img
-													src={products[selectedIndex].imageSrc}
-													alt={products[selectedIndex].imageAlt}
+													src={products && products[selectedIndex].thumbnail}
+													alt={products && products[selectedIndex].title}
 													className="object-cover object-center"
 												/>
 											</div>
 											<div className="sm:col-span-8 lg:col-span-7">
 												<h2 className="text-2xl font-bold text-gray-900 sm:pr-12">
-													{products[selectedIndex].name}
+													{products && products[selectedIndex].title}
 												</h2>
 
 												<section
@@ -180,11 +159,11 @@ const ProductContent = (props: Props) => {
 													</h3>
 
 													<p className="text-2xl text-gray-900">
-														{products[selectedIndex].price}
+														${products && products[selectedIndex].price}
 													</p>
 
 													{/* Reviews */}
-													<div className="mt-6">
+													{/* <div className="mt-6">
 														<h4 className="sr-only">Reviews</h4>
 														<div className="flex items-center">
 															<div className="flex items-center">
@@ -202,7 +181,7 @@ const ProductContent = (props: Props) => {
 																))}
 															</div>
 															<p className="sr-only">
-																{product.rating} out of 5 stars
+																{products && products.rating} out of 5 stars
 															</p>
 															<a
 																href="#"
@@ -211,12 +190,12 @@ const ProductContent = (props: Props) => {
 																{product.reviewCount} reviews
 															</a>
 														</div>
-													</div>
+													</div> */}
 												</section>
 
 												<section
 													aria-labelledby="options-heading"
-													className="mt-10"
+													className="mt-3"
 												>
 													<h3
 														id="options-heading"
@@ -224,16 +203,25 @@ const ProductContent = (props: Props) => {
 													>
 														Product Description
 													</h3>
-                                                    <h4  className="font-semibold">Description</h4>
-                                                    <p>Some weird Description</p>
+													<h4 className="font-semibold">Description</h4>
+													<p>
+														{products && products[selectedIndex].description}
+													</p>
 													<form>
-													
-
 														<button
 															type="submit"
+															disabled={isAddingToCart}
+															aria-disabled={isAddingToCart}
+															onClick={() =>
+																handleAddToCart(products[selectedIndex]?.id)
+															}
 															className="mt-6 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 														>
-															Add to bag
+															{isAddingToCart ? (
+																<ReloadIcon className="animate-spin" />
+															) : (
+																"Add To Cart"
+															)}
 														</button>
 													</form>
 												</section>
